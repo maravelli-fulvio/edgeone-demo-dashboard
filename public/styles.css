@@ -64,6 +64,7 @@ button {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  align-items: start;
 }
 
 .card {
@@ -102,13 +103,16 @@ button {
 
 .chart-card {
   height: 340px;
+  max-height: 340px;
   overflow: hidden;
 }
 
 .chart-wrap {
   position: relative;
   height: 260px;
+  max-height: 260px;
   width: 100%;
+  overflow: hidden;
 }
 
 .chart-card canvas {

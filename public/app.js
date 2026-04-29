@@ -39,7 +39,13 @@ function renderCharts(payload) {
         },
       ],
     },
-    options: { responsive: true, maintainAspectRatio: false, animation: false, resizeDelay: 150 },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 2,
+      animation: false,
+      resizeDelay: 150,
+    },
   });
 
   const securityScore = [
@@ -63,7 +69,8 @@ function renderCharts(payload) {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false,
+      maintainAspectRatio: true,
+      aspectRatio: 2,
       animation: false,
       resizeDelay: 150,
       scales: { y: { min: 0, max: 1, ticks: { stepSize: 1 } } },
@@ -98,6 +105,24 @@ function renderData(payload) {
   document.getElementById("streamingValue").textContent =
     `${payload.http.streamingHint} (${payload.http.transferEncoding})`;
   document.getElementById("sseValue").textContent = "checando...";
+  document.getElementById("subdomainCountValue").textContent =
+    payload.subdomains?.totalDetected === null
+      ? "indisponivel"
+      : String(payload.subdomains.totalDetected);
+  document.getElementById("wafSignalValue").textContent =
+    payload.securitySignals?.waf || "N/A";
+  document.getElementById("ddosSignalValue").textContent =
+    payload.securitySignals?.antiDdos || "N/A";
+  document.getElementById("hstsSignalValue").textContent =
+    payload.securitySignals?.httpsEnforced || "N/A";
+  document.getElementById("cspSignalValue").textContent =
+    payload.securitySignals?.cspEnabled || "N/A";
+  document.getElementById("tlsSignalValue").textContent =
+    payload.securitySignals?.secureTls || "N/A";
+  document.getElementById("providerSignalValue").textContent =
+    payload.securitySignals?.providerHint || "N/A";
+  document.getElementById("securitySignalNote").textContent =
+    payload.securitySignals?.note || "";
 
   const recList = document.getElementById("recommendations");
   recList.innerHTML = "";
@@ -106,6 +131,22 @@ function renderData(payload) {
     li.textContent = item;
     recList.appendChild(li);
   });
+
+  const subdomainList = document.getElementById("subdomainSamples");
+  subdomainList.innerHTML = "";
+  (payload.subdomains?.sampleList || []).forEach((host) => {
+    const li = document.createElement("li");
+    li.textContent = host;
+    subdomainList.appendChild(li);
+  });
+
+  if (!subdomainList.children.length) {
+    const li = document.createElement("li");
+    li.textContent = "Nenhum exemplo retornado.";
+    subdomainList.appendChild(li);
+  }
+
+  document.getElementById("subdomainNote").textContent = payload.subdomains?.note || "";
 
   renderCoverage("nativeCoverage", payload.coverage?.terraformNative || []);
   renderCoverage("apiCoverage", payload.coverage?.apiOrModule || []);

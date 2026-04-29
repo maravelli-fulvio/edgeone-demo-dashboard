@@ -186,6 +186,7 @@ async function getHttpInfo(domain) {
       statusCode: response.status,
       ttfbMs: Date.now() - startedAt,
       server: response.headers.server || "N/A",
+      allHeaders: response.headers,
       cacheControl: response.headers["cache-control"] || "N/A",
       age: response.headers.age || "N/A",
       etag: response.headers.etag || "N/A",
@@ -206,6 +207,7 @@ async function getHttpInfo(domain) {
       statusCode: null,
       ttfbMs: null,
       server: "N/A",
+      allHeaders: {},
       cacheControl: "N/A",
       age: "N/A",
       etag: "N/A",
@@ -217,6 +219,41 @@ async function getHttpInfo(domain) {
       streamingHint: "not-detected",
     };
   }
+}
+
+function inferSecuritySignals(httpInfo, dnsInfo, sslInfo, edgeone) {
+  const headers = httpInfo.allHeaders || {};
+  const providerHint = `${httpInfo.server} ${dnsInfo.cnameRecords.join(" ")}`.toLowerCase();
+
+  const wafSignal =
+    edgeone.enabled ||
+    Boolean(
+      headers["cf-ray"] ||
+        headers["x-sucuri-id"] ||
+        headers["x-akamai-request-id"] ||
+        providerHint.includes("cloudflare") ||
+        providerHint.includes("edgeone") ||
+        providerHint.includes("akamai")
+    );
+
+  const ddosSignal =
+    edgeone.enabled ||
+    Boolean(
+      headers["cf-ray"] ||
+        providerHint.includes("cloudflare") ||
+        providerHint.includes("edgeone") ||
+        providerHint.includes("akamai")
+    );
+
+  return {
+    waf: wafSignal ? "detected-or-likely" : "not-detected",
+    antiDdos: ddosSignal ? "detected-or-likely" : "not-detected",
+    httpsEnforced: httpInfo.strictTransportSecurity === "enabled" ? "yes" : "no",
+    cspEnabled: httpInfo.contentSecurityPolicy === "enabled" ? "yes" : "no",
+    secureTls: sslInfo.valid && (sslInfo.tlsVersion || "").startsWith("TLSv1.3") ? "yes" : "partial",
+    providerHint: httpInfo.server !== "N/A" ? httpInfo.server : "N/A",
+    note: "Heuristica por headers/DNS; para status oficial use API EdgeOne.",
+  };
 }
 
 async function getEdgeOneMetrics(domain) {
@@ -250,6 +287,43 @@ async function getEdgeOneMetrics(domain) {
       reason: "Could not fetch EdgeOne metrics with current credentials.",
       wafHits24h: null,
       ddosEvents24h: null,
+    };
+  }
+}
+
+async function getSubdomainInsights(domain) {
+  try {
+    const response = await axios.get(`https://crt.sh/?q=%25.${domain}&output=json`, {
+      timeout: 7000,
+    });
+
+    const rows = Array.isArray(response.data) ? response.data : [];
+    const discovered = new Set();
+
+    rows.forEach((row) => {
+      const rawNames = String(row.name_value || "").split("\n");
+      rawNames.forEach((name) => {
+        const normalized = name.trim().toLowerCase().replace(/^\*\./, "");
+        if (!normalized || normalized === domain) return;
+        if (normalized.endsWith(`.${domain}`)) {
+          discovered.add(normalized);
+        }
+      });
+    });
+
+    const samples = [...discovered].sort().slice(0, 10);
+    return {
+      totalDetected: discovered.size,
+      sampleList: samples,
+      source: "crt.sh certificate transparency",
+      note: "Pode nao listar 100% dos subdominios ativos.",
+    };
+  } catch {
+    return {
+      totalDetected: null,
+      sampleList: [],
+      source: "crt.sh certificate transparency",
+      note: "Nao foi possivel consultar a fonte agora.",
     };
   }
 }
@@ -293,13 +367,15 @@ app.get("/api/analyze", async (req, res) => {
     const dnsInfo = await getDnsInfo(domain);
     const primaryIp = dnsInfo.aRecords[0] || null;
 
-    const [sslInfo, httpInfo, latencyInfo, geoInfo, edgeone] = await Promise.all([
+    const [sslInfo, httpInfo, latencyInfo, geoInfo, edgeone, subdomains] = await Promise.all([
       getSslInfo(domain),
       getHttpInfo(domain),
       measureLatency(domain),
       getGeoInfo(primaryIp),
       getEdgeOneMetrics(domain),
+      getSubdomainInsights(domain),
     ]);
+    const securitySignals = inferSecuritySignals(httpInfo, dnsInfo, sslInfo, edgeone);
 
     res.json({
       analyzedAt: new Date().toISOString(),
@@ -316,6 +392,8 @@ app.get("/api/analyze", async (req, res) => {
         ddosEvents24h: edgeone.ddosEvents24h,
         edgeoneNote: edgeone.reason,
       },
+      securitySignals,
+      subdomains,
       coverage: {
         terraformNative: [
           "basic_domain_and_dns",

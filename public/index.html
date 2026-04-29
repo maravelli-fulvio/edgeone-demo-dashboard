@@ -33,7 +33,21 @@
           <article class="card"><h3>Cache-Control</h3><p id="cacheValue">-</p></article>
           <article class="card"><h3>Streaming</h3><p id="streamingValue">-</p></article>
           <article class="card"><h3>SSE</h3><p id="sseValue">-</p></article>
+          <article class="card"><h3>Subdominios detectados</h3><p id="subdomainCountValue">-</p></article>
         </div>
+
+        <article class="card">
+          <h3>Sinais de seguranca</h3>
+          <div class="coverage-grid">
+            <div><h4>WAF</h4><p id="wafSignalValue">-</p></div>
+            <div><h4>Anti-DDoS</h4><p id="ddosSignalValue">-</p></div>
+            <div><h4>HSTS</h4><p id="hstsSignalValue">-</p></div>
+            <div><h4>CSP</h4><p id="cspSignalValue">-</p></div>
+            <div><h4>TLS forte</h4><p id="tlsSignalValue">-</p></div>
+            <div><h4>Provider hint</h4><p id="providerSignalValue">-</p></div>
+          </div>
+          <p id="securitySignalNote"></p>
+        </article>
 
         <div class="charts">
           <div class="card chart-card">
@@ -49,6 +63,12 @@
         <article class="card">
           <h3>Recomendacoes</h3>
           <ul id="recommendations"></ul>
+        </article>
+
+        <article class="card">
+          <h3>Exemplos de subdominios</h3>
+          <ul id="subdomainSamples"></ul>
+          <p id="subdomainNote"></p>
         </article>
 
         <article class="card">
