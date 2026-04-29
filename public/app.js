@@ -18,8 +18,8 @@ function setError(message = "") {
 }
 
 function renderCharts(payload) {
-  const latencyCtx = document.getElementById("latencyChart");
-  const securityCtx = document.getElementById("securityChart");
+  const latencyCtx = document.getElementById("latencyChart").getContext("2d");
+  const securityCtx = document.getElementById("securityChart").getContext("2d");
 
   if (latencyChart) latencyChart.destroy();
   if (securityChart) securityChart.destroy();
@@ -39,7 +39,7 @@ function renderCharts(payload) {
         },
       ],
     },
-    options: { responsive: true, maintainAspectRatio: false },
+    options: { responsive: true, maintainAspectRatio: false, animation: false, resizeDelay: 150 },
   });
 
   const securityScore = [
@@ -64,8 +64,20 @@ function renderCharts(payload) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: false,
+      resizeDelay: 150,
       scales: { y: { min: 0, max: 1, ticks: { stepSize: 1 } } },
     },
+  });
+}
+
+function renderCoverage(listId, values = []) {
+  const list = document.getElementById(listId);
+  list.innerHTML = "";
+  values.forEach((value) => {
+    const item = document.createElement("li");
+    item.textContent = value.replaceAll("_", " ");
+    list.appendChild(item);
   });
 }
 
@@ -82,6 +94,10 @@ function renderData(payload) {
     `${payload.geo.country} / ${payload.geo.region}`;
   document.getElementById("securityValue").textContent =
     `${payload.security.wafEnabled} | ${payload.security.ddosProtection}`;
+  document.getElementById("cacheValue").textContent = payload.http.cacheControl || "N/A";
+  document.getElementById("streamingValue").textContent =
+    `${payload.http.streamingHint} (${payload.http.transferEncoding})`;
+  document.getElementById("sseValue").textContent = "checando...";
 
   const recList = document.getElementById("recommendations");
   recList.innerHTML = "";
@@ -90,6 +106,10 @@ function renderData(payload) {
     li.textContent = item;
     recList.appendChild(li);
   });
+
+  renderCoverage("nativeCoverage", payload.coverage?.terraformNative || []);
+  renderCoverage("apiCoverage", payload.coverage?.apiOrModule || []);
+  renderCoverage("missingCoverage", payload.coverage?.notAvailableYet || []);
 
   renderCharts(payload);
   results.classList.remove("hidden");
@@ -111,6 +131,16 @@ async function analyzeDomain() {
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || "Falha ao analisar dominio");
     renderData(payload);
+
+    try {
+      const sseResponse = await fetch("/api/sse-check");
+      const ssePayload = await sseResponse.json();
+      document.getElementById("sseValue").textContent = ssePayload.endpoint
+        ? `suportado (${ssePayload.endpoint})`
+        : "nao suportado";
+    } catch {
+      document.getElementById("sseValue").textContent = "erro na checagem";
+    }
   } catch (error) {
     setError(error.message || "Falha inesperada.");
   } finally {

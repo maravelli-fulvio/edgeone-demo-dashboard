@@ -30,22 +30,43 @@
           <article class="card"><h3>Latencia media</h3><p id="latencyValue">-</p></article>
           <article class="card"><h3>Regiao</h3><p id="regionValue">-</p></article>
           <article class="card"><h3>WAF / DDoS</h3><p id="securityValue">-</p></article>
+          <article class="card"><h3>Cache-Control</h3><p id="cacheValue">-</p></article>
+          <article class="card"><h3>Streaming</h3><p id="streamingValue">-</p></article>
+          <article class="card"><h3>SSE</h3><p id="sseValue">-</p></article>
         </div>
 
         <div class="charts">
           <div class="card chart-card">
             <h3>Amostras de latencia (ms)</h3>
-            <canvas id="latencyChart"></canvas>
+            <div class="chart-wrap"><canvas id="latencyChart"></canvas></div>
           </div>
           <div class="card chart-card">
             <h3>Postura de seguranca</h3>
-            <canvas id="securityChart"></canvas>
+            <div class="chart-wrap"><canvas id="securityChart"></canvas></div>
           </div>
         </div>
 
         <article class="card">
           <h3>Recomendacoes</h3>
           <ul id="recommendations"></ul>
+        </article>
+
+        <article class="card">
+          <h3>Coverage (Terraform e API)</h3>
+          <div class="coverage-grid">
+            <div>
+              <h4>Nativo</h4>
+              <ul id="nativeCoverage"></ul>
+            </div>
+            <div>
+              <h4>Via API / Modulos</h4>
+              <ul id="apiCoverage"></ul>
+            </div>
+            <div>
+              <h4>Ainda nao coberto</h4>
+              <ul id="missingCoverage"></ul>
+            </div>
+          </div>
         </article>
       </section>
     </main>

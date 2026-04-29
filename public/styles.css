@@ -82,6 +82,7 @@ button {
 .card p {
   margin: 0;
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .error {
@@ -100,5 +101,35 @@ button {
 }
 
 .chart-card {
-  min-height: 280px;
+  height: 340px;
+  overflow: hidden;
+}
+
+.chart-wrap {
+  position: relative;
+  height: 260px;
+  width: 100%;
+}
+
+.chart-card canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.coverage-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.coverage-grid h4 {
+  margin: 0 0 8px;
+  color: #d7e5ff;
+}
+
+.coverage-grid ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #dce6ff;
 }

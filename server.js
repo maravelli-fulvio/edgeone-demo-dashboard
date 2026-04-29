@@ -186,20 +186,35 @@ async function getHttpInfo(domain) {
       statusCode: response.status,
       ttfbMs: Date.now() - startedAt,
       server: response.headers.server || "N/A",
+      cacheControl: response.headers["cache-control"] || "N/A",
+      age: response.headers.age || "N/A",
+      etag: response.headers.etag || "N/A",
+      vary: response.headers.vary || "N/A",
+      transferEncoding: response.headers["transfer-encoding"] || "N/A",
+      contentType: response.headers["content-type"] || "N/A",
       strictTransportSecurity: response.headers["strict-transport-security"]
         ? "enabled"
         : "missing",
       contentSecurityPolicy: response.headers["content-security-policy"]
         ? "enabled"
         : "missing",
+      streamingHint:
+        response.headers["transfer-encoding"] === "chunked" ? "possible" : "not-detected",
     };
   } catch {
     return {
       statusCode: null,
       ttfbMs: null,
       server: "N/A",
+      cacheControl: "N/A",
+      age: "N/A",
+      etag: "N/A",
+      vary: "N/A",
+      transferEncoding: "N/A",
+      contentType: "N/A",
       strictTransportSecurity: "missing",
       contentSecurityPolicy: "missing",
+      streamingHint: "not-detected",
     };
   }
 }
@@ -243,6 +258,31 @@ app.get("/api/health", (_req, res) => {
   res.json({ ok: true, service: "edgeone-demo-dashboard" });
 });
 
+app.get("/api/sse-check", (_req, res) => {
+  res.json({
+    supportedByBrowser: true,
+    endpoint: "/api/sse-stream",
+    notes: "Use EventSource in browser to consume server-sent events.",
+  });
+});
+
+app.get("/api/sse-stream", (req, res) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.flushHeaders();
+
+  res.write(`event: connected\ndata: ${JSON.stringify({ ok: true })}\n\n`);
+  const timer = setInterval(() => {
+    res.write(`event: heartbeat\ndata: ${JSON.stringify({ ts: new Date().toISOString() })}\n\n`);
+  }, 5000);
+
+  req.on("close", () => {
+    clearInterval(timer);
+    res.end();
+  });
+});
+
 app.get("/api/analyze", async (req, res) => {
   const domain = sanitizeDomain(req.query.domain);
   if (!isValidDomain(domain)) {
@@ -275,6 +315,22 @@ app.get("/api/analyze", async (req, res) => {
         wafHits24h: edgeone.wafHits24h,
         ddosEvents24h: edgeone.ddosEvents24h,
         edgeoneNote: edgeone.reason,
+      },
+      coverage: {
+        terraformNative: [
+          "basic_domain_and_dns",
+          "certificate_attachment",
+          "rule_engine_basics",
+        ],
+        apiOrModule: [
+          "advanced_waf_rate_limit",
+          "log_delivery_s3",
+          "versioned_config_rollout",
+        ],
+        notAvailableYet: [
+          "full_formal_coverage_for_all_edgeone_features",
+          "complete_subdomain_lifecycle_automation",
+        ],
       },
       recommendations: [
         sslInfo.daysRemaining !== null && sslInfo.daysRemaining < 30
