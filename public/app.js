@@ -88,6 +88,13 @@ function renderCoverage(listId, values = []) {
   });
 }
 
+function setSignalPill(elementId, value, type = "neutral") {
+  const node = document.getElementById(elementId);
+  node.textContent = value || "N/A";
+  node.classList.remove("good", "warn", "bad", "neutral");
+  node.classList.add(type);
+}
+
 function renderData(payload) {
   document.getElementById("domainValue").textContent = payload.domain;
   document.getElementById("ttlValue").textContent =
@@ -109,18 +116,27 @@ function renderData(payload) {
     payload.subdomains?.totalDetected === null
       ? "indisponivel"
       : String(payload.subdomains.totalDetected);
-  document.getElementById("wafSignalValue").textContent =
-    payload.securitySignals?.waf || "N/A";
-  document.getElementById("ddosSignalValue").textContent =
-    payload.securitySignals?.antiDdos || "N/A";
-  document.getElementById("hstsSignalValue").textContent =
-    payload.securitySignals?.httpsEnforced || "N/A";
-  document.getElementById("cspSignalValue").textContent =
-    payload.securitySignals?.cspEnabled || "N/A";
-  document.getElementById("tlsSignalValue").textContent =
-    payload.securitySignals?.secureTls || "N/A";
-  document.getElementById("providerSignalValue").textContent =
-    payload.securitySignals?.providerHint || "N/A";
+  const waf = payload.securitySignals?.waf || "N/A";
+  const antiDdos = payload.securitySignals?.antiDdos || "N/A";
+  const hsts = payload.securitySignals?.httpsEnforced || "N/A";
+  const csp = payload.securitySignals?.cspEnabled || "N/A";
+  const tls = payload.securitySignals?.secureTls || "N/A";
+  const provider = payload.securitySignals?.providerHint || "N/A";
+
+  setSignalPill(
+    "wafSignalValue",
+    waf,
+    waf === "detected-or-likely" ? "good" : waf === "not-detected" ? "warn" : "neutral"
+  );
+  setSignalPill(
+    "ddosSignalValue",
+    antiDdos,
+    antiDdos === "detected-or-likely" ? "good" : antiDdos === "not-detected" ? "warn" : "neutral"
+  );
+  setSignalPill("hstsSignalValue", hsts, hsts === "yes" ? "good" : "bad");
+  setSignalPill("cspSignalValue", csp, csp === "yes" ? "good" : "warn");
+  setSignalPill("tlsSignalValue", tls, tls === "yes" ? "good" : "warn");
+  setSignalPill("providerSignalValue", provider, "neutral");
   document.getElementById("securitySignalNote").textContent =
     payload.securitySignals?.note || "";
 

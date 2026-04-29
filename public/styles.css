@@ -137,3 +137,55 @@ button {
   padding-left: 18px;
   color: #dce6ff;
 }
+
+.security-signals-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.security-signal-item {
+  border: 1px solid #30426f;
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.security-signal-item h4 {
+  margin: 0 0 8px;
+  color: #c6d8ff;
+}
+
+.security-pill {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.security-pill.good {
+  background: rgba(68, 209, 139, 0.18);
+  color: #82f0be;
+}
+
+.security-pill.warn {
+  background: rgba(255, 188, 66, 0.18);
+  color: #ffd98a;
+}
+
+.security-pill.bad {
+  background: rgba(255, 107, 107, 0.18);
+  color: #ffb0b0;
+}
+
+.security-pill.neutral {
+  background: rgba(130, 169, 255, 0.18);
+  color: #bfd2ff;
+}
+
+.security-note {
+  margin-top: 10px !important;
+  color: #9fb3e6;
+  font-size: 13px;
+}

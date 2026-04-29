@@ -38,15 +38,33 @@
 
         <article class="card">
           <h3>Sinais de seguranca</h3>
-          <div class="coverage-grid">
-            <div><h4>WAF</h4><p id="wafSignalValue">-</p></div>
-            <div><h4>Anti-DDoS</h4><p id="ddosSignalValue">-</p></div>
-            <div><h4>HSTS</h4><p id="hstsSignalValue">-</p></div>
-            <div><h4>CSP</h4><p id="cspSignalValue">-</p></div>
-            <div><h4>TLS forte</h4><p id="tlsSignalValue">-</p></div>
-            <div><h4>Provider hint</h4><p id="providerSignalValue">-</p></div>
+          <div class="security-signals-grid">
+            <div class="security-signal-item">
+              <h4>WAF</h4>
+              <p class="security-pill" id="wafSignalValue">-</p>
+            </div>
+            <div class="security-signal-item">
+              <h4>Anti-DDoS</h4>
+              <p class="security-pill" id="ddosSignalValue">-</p>
+            </div>
+            <div class="security-signal-item">
+              <h4>HSTS</h4>
+              <p class="security-pill" id="hstsSignalValue">-</p>
+            </div>
+            <div class="security-signal-item">
+              <h4>CSP</h4>
+              <p class="security-pill" id="cspSignalValue">-</p>
+            </div>
+            <div class="security-signal-item">
+              <h4>TLS forte</h4>
+              <p class="security-pill" id="tlsSignalValue">-</p>
+            </div>
+            <div class="security-signal-item">
+              <h4>Provider hint</h4>
+              <p class="security-pill neutral" id="providerSignalValue">-</p>
+            </div>
           </div>
-          <p id="securitySignalNote"></p>
+          <p class="security-note" id="securitySignalNote"></p>
         </article>
 
         <div class="charts">
