@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EdgeOne Demo Dashboard</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>EdgeOne Domain Insights</h1>
+        <p>Demo para avaliar performance, DNS, SSL e seguranca de um dominio.</p>
+      </header>
+
+      <section class="search-box">
+        <input id="domainInput" type="text" placeholder="ex: meucliente.com.br" />
+        <button id="analyzeBtn">Analisar</button>
+      </section>
+
+      <section id="loading" class="hidden">Analisando dominio...</section>
+      <section id="errorBox" class="error hidden"></section>
+
+      <section id="results" class="hidden">
+        <div class="grid">
+          <article class="card"><h3>Dominio</h3><p id="domainValue">-</p></article>
+          <article class="card"><h3>TTL</h3><p id="ttlValue">-</p></article>
+          <article class="card"><h3>SSL</h3><p id="sslValue">-</p></article>
+          <article class="card"><h3>Latencia media</h3><p id="latencyValue">-</p></article>
+          <article class="card"><h3>Regiao</h3><p id="regionValue">-</p></article>
+          <article class="card"><h3>WAF / DDoS</h3><p id="securityValue">-</p></article>
+        </div>
+
+        <div class="charts">
+          <div class="card chart-card">
+            <h3>Amostras de latencia (ms)</h3>
+            <canvas id="latencyChart"></canvas>
+          </div>
+          <div class="card chart-card">
+            <h3>Postura de seguranca</h3>
+            <canvas id="securityChart"></canvas>
+          </div>
+        </div>
+
+        <article class="card">
+          <h3>Recomendacoes</h3>
+          <ul id="recommendations"></ul>
+        </article>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+  </html>
